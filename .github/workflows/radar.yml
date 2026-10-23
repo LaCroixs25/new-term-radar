@@ -21,8 +21,7 @@ name: New-term radar
 
 on:
   schedule:
-    - cron: "0 0,8,16 * * *"   # sources
-    - cron: "30 1 * * *"       # daily
+    - cron: "30 23 * * *"      # daily, 7:30 Beijing time; free signals only (no AIsa key)
   workflow_dispatch:
     inputs:
       command:
@@ -42,7 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
-      COMMAND: ${{ github.event.inputs.command || (github.event.schedule == '30 1 * * *' && 'daily' || 'sources') }}
+      COMMAND: ${{ github.event.inputs.command || 'daily' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -70,7 +69,7 @@ jobs:
           RADAR_EMAIL_TO: ${{ secrets.RADAR_EMAIL_TO }}
         run: |
           if [ "$COMMAND" = "daily" ]; then
-            python -m radar daily --skip x,hf --out report.md ${RADAR_EMAIL_TO:+--mail}
+            python -m radar daily --skip x,judge,usecases,newsites,review --out report.md ${RADAR_EMAIL_TO:+--mail}
           else
             python -m radar sources --out report.md ${RADAR_EMAIL_TO:+--mail}
           fi
